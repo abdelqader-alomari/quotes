@@ -4,32 +4,66 @@
 package quotes;
 
 import com.google.gson.Gson;
-// import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.*;
 import java.lang.reflect.Type;
+import java.net.HttpURLConnection;
+//import java.net.MalformedURLException;
+import java.net.URL;
+//import java.util.ArrayList;
 import java.util.List;
+
 
 public class App {
     public String getGreeting() {
         return "Hello World!";
     }
 
-    public static void main(String[] args) throws FileNotFoundException {
+    public static void main(String[] args) throws IOException {
 
-        Reader jsonReader = new FileReader("recentquotes.json");
+        try {
+        String url = "http://api.forismatic.com/api/1.0/?method=getQuote&format=json&lang=en";
+        HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
 
-        Type quote = new TypeToken<List<Books>>() {
-        }.getType();
-        List<Books> quotes = new Gson().fromJson(jsonReader, quote);
-        int randomQuote = (int) (Math.random() * (quotes.size()));
+        connection.setConnectTimeout(5000);
+        connection.setReadTimeout(5000);
 
-        System.out.println(quotes.get(randomQuote));
-        System.out.println("Author: " + quotes.get(randomQuote).getAuthor());
-        System.out.println("Quote: " + quotes.get(randomQuote).getText());
-        System.out.println("likes: " + quotes.get(randomQuote).getLikes());
+        int responseCode = connection.getResponseCode();
+
+        System.out.println("Welcome to the forismatic.com");
+        System.out.println("There are not any catalogues of phrases or lists of authors on the site, full of sages and philosophers’ thoughts, writers and outstanding people’s aphorisms. We don’t believe in a random choice. Only you can guide your destiny. Just listen to yourself and one of the most inspiring expressions of mankind will be the sign for you.\n");
+
+        System.out.println(connection);
+
+        InputStreamReader inputStreamReader = new InputStreamReader(connection.getInputStream());
+        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+        // this data is the JSON
+        String data = bufferedReader.readLine();
+        System.out.println(data);
+
+        bufferedReader.close();
+        Gson gson = new Gson();
+        QuotesHTTP quotesHTTP = gson.fromJson(data, QuotesHTTP.class);
+        System.out.println("َQuotes HTTP: " + quotesHTTP);
+        System.out.println("Author: " + quotesHTTP.getQuoteAuthor());
+        System.out.println("Quote: " + quotesHTTP.getQuoteText());
 
     }
+        catch (IOException e) {
+            System.out.println("Request unable to processed from http, will request from a file");
+            Reader jsonReader = new FileReader("recentquotes.json");
 
+            Type quote = new TypeToken<List<Books>>() {
+            }.getType();
+            List<Books> quotes = new Gson().fromJson(jsonReader, quote);
+            int randomQuote = (int) (Math.random() * (quotes.size()));
+
+            System.out.println(quotes.get(randomQuote));
+            System.out.println("Author: " + quotes.get(randomQuote).getAuthor());
+            System.out.println("Quote: " + quotes.get(randomQuote).getText());
+            System.out.println("likes: " + quotes.get(randomQuote).getLikes());
+        }
+    }
 }
