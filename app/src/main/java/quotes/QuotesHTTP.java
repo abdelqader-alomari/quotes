@@ -1,8 +1,8 @@
 package quotes;
 
 public class QuotesHTTP {
-   String quoteAuthor;
-   String quoteText;
+   private String quoteAuthor;
+   private String quoteText;
 
     public QuotesHTTP(String quoteAuthor, String quoteText) {
         this.quoteAuthor = quoteAuthor;
